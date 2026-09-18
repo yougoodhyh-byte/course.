@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="教学服务课表网站，可按周查看、添加课程并下载课表数据。" />
+  <meta name="theme-color" content="#0f5f4d" />
+  <title>教学服务 · 课表</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <main class="page-shell">
+    <header class="topbar">
+      <h1>教学服务</h1>
+      <button class="download-btn" id="downloadBtn" type="button" aria-label="下载课表数据">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18">
+          <path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span>数据下载</span>
+      </button>
+    </header>
+
+    <nav class="tabs" aria-label="教学服务栏目">
+      <button class="tab active" type="button" data-tab="schedule">教学课程时间</button>
+      <button class="tab" type="button" data-tab="notices">重要事项</button>
+      <button class="tab" type="button" data-tab="services">其他服务</button>
+    </nav>
+
+    <section class="tab-panel active" id="schedulePanel" data-panel="schedule">
+      <div class="schedule-toolbar">
+        <div class="week-picker-wrap">
+          <span class="week-label">选择周次：</span>
+          <div class="week-picker" id="weekPicker" aria-label="选择要显示的教学周"></div>
+        </div>
+        <button class="add-course-btn" id="addCourseBtn" type="button">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="21" height="21">
+            <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+          </svg>
+          <span>添加课程</span>
+        </button>
+      </div>
+
+      <div class="schedule-list" id="scheduleList" aria-live="polite"></div>
+    </section>
+
+    <section class="tab-panel" id="noticesPanel" data-panel="notices">
+      <div class="content-card">
+        <h2>重要事项</h2>
+        <div class="notice-grid">
+          <article class="notice-item">
+            <span class="notice-date">第3周起</span>
+            <h3>课程正式开始</h3>
+            <p>微观经济学、计量经济学与专业认知均从第3周开始显示。</p>
+          </article>
+          <article class="notice-item">
+            <span class="notice-date">上课前</span>
+            <h3>请核对教室</h3>
+            <p>临时调课或教室变更时，可点击课程卡片直接修改并自动保存。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="servicesPanel" data-panel="services">
+      <div class="content-card">
+        <h2>其他服务</h2>
+        <div class="service-actions">
+          <button class="secondary-btn" id="resetBtn" type="button">恢复示例课表</button>
+          <button class="secondary-btn" id="selectCurrentWeekBtn" type="button">仅显示当前周</button>
+        </div>
+        <p class="service-tip">所有修改保存在当前浏览器的本地存储中，不会上传到服务器。</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <h2 id="modalTitle">添加课程</h2>
+        <button class="icon-btn" id="closeModalBtn" type="button" aria-label="关闭">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="21" height="21">
+            <path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="courseForm">
+        <input type="hidden" id="courseId" />
+        <div class="form-grid">
+          <label class="field field-wide">
+            <span>课程名称</span>
+            <input id="courseName" name="courseName" type="text" required maxlength="30" placeholder="例如：微观经济学" />
+          </label>
+
+          <label class="field field-wide">
+            <span>上课地点</span>
+            <input id="courseLocation" name="courseLocation" type="text" required maxlength="50" placeholder="例如：东海岸-E教338" />
+          </label>
+
+          <label class="field">
+            <span>星期</span>
+            <select id="courseDay" name="courseDay" required>
+              <option value="1">周一</option>
+              <option value="2">周二</option>
+              <option value="3">周三</option>
+              <option value="4">周四</option>
+              <option value="5">周五</option>
+              <option value="6">周六</option>
+              <option value="7">周日</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>开始节次</span>
+            <select id="courseStartPeriod" name="courseStartPeriod" required></select>
+          </label>
+
+          <label class="field">
+            <span>结束节次</span>
+            <select id="courseEndPeriod" name="courseEndPeriod" required></select>
+          </label>
+
+          <label class="field">
+            <span>卡片颜色</span>
+            <select id="courseTheme" name="courseTheme" required>
+              <option value="orange">橙色</option>
+              <option value="pink">粉色</option>
+              <option value="blue">蓝色</option>
+              <option value="green">绿色</option>
+              <option value="purple">紫色</option>
+            </select>
+          </label>
+
+          <label class="field field-wide">
+            <span>上课周次</span>
+            <input id="courseWeeks" name="courseWeeks" type="text" required placeholder="例如：3-18，或 3,5,7-10" />
+            <small>支持单周、逗号分隔与连续周次范围。</small>
+          </label>
+        </div>
+
+        <p class="form-error" id="formError" role="alert" hidden></p>
+
+        <div class="modal-actions">
+          <button class="danger-btn" id="deleteCourseBtn" type="button" hidden>删除课程</button>
+          <div class="modal-actions-right">
+            <button class="secondary-btn" id="cancelBtn" type="button">取消</button>
+            <button class="primary-btn" type="submit">保存课程</button>
+          </div>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="assets/app.js" defer></script>
+</body>
+</html>
